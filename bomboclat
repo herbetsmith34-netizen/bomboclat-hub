@@ -44,7 +44,7 @@ Rayfield:Notify({
 local Tab = Window:CreateTab("main", 4483362458)
 
 -- Reset Walkspeed
-local Button = Tab:CreateButton({
+Tab:CreateButton({
    Name = "Reset Speed",
    Callback = function()
       local char = game.Players.LocalPlayer.Character
@@ -56,7 +56,7 @@ local Button = Tab:CreateButton({
 })
 
 -- Speed Slider
-local SpeedSlider = Tab:CreateSlider({
+Tab:CreateSlider({
    Name = "WalkSpeed",
    Range = {1, 500},
    Increment = 5,
@@ -74,9 +74,10 @@ local SpeedSlider = Tab:CreateSlider({
 -- Fly System
 local flying = false
 local flySpeed = 50
+local flyConnection
 
 -- Fly Toggle
-local Toggle = Tab:CreateToggle({
+Tab:CreateToggle({
    Name = "Fly",
    CurrentValue = false,
    Flag = "FlyToggle",
@@ -84,7 +85,6 @@ local Toggle = Tab:CreateToggle({
       flying = Value
       local plr = game.Players.LocalPlayer
       local char = plr.Character or plr.CharacterAdded:Wait()
-      local hum = char:FindFirstChildOfClass("Humanoid")
       local hrp = char:FindFirstChild("HumanoidRootPart")
 
       if flying then
@@ -95,14 +95,13 @@ local Toggle = Tab:CreateToggle({
          bv.MaxForce = Vector3.new(4000,4000,4000)
          bv.Parent = hrp
 
-         -- Move with WASD
-         game:GetService("RunService").RenderStepped:Connect(function()
+         flyConnection = game:GetService("RunService").RenderStepped:Connect(function()
             if flying and hrp then
                local dir = Vector3.new()
-               if game.UserInputService:IsKeyDown(Enum.KeyCode.W) then dir = dir + (workspace.CurrentCamera.CFrame.LookVector) end
-               if game.UserInputService:IsKeyDown(Enum.KeyCode.S) then dir = dir - (workspace.CurrentCamera.CFrame.LookVector) end
-               if game.UserInputService:IsKeyDown(Enum.KeyCode.A) then dir = dir - (workspace.CurrentCamera.CFrame.RightVector) end
-               if game.UserInputService:IsKeyDown(Enum.KeyCode.D) then dir = dir + (workspace.CurrentCamera.CFrame.RightVector) end
+               if game.UserInputService:IsKeyDown(Enum.KeyCode.W) then dir = dir + workspace.CurrentCamera.CFrame.LookVector end
+               if game.UserInputService:IsKeyDown(Enum.KeyCode.S) then dir = dir - workspace.CurrentCamera.CFrame.LookVector end
+               if game.UserInputService:IsKeyDown(Enum.KeyCode.A) then dir = dir - workspace.CurrentCamera.CFrame.RightVector end
+               if game.UserInputService:IsKeyDown(Enum.KeyCode.D) then dir = dir + workspace.CurrentCamera.CFrame.RightVector end
                bv.Velocity = dir * flySpeed
             end
          end)
@@ -111,19 +110,36 @@ local Toggle = Tab:CreateToggle({
          if hrp:FindFirstChild("FlyVelocity") then
             hrp.FlyVelocity:Destroy()
          end
+         if flyConnection then
+            flyConnection:Disconnect()
+            flyConnection = nil
+         end
       end
    end,
 })
 
-local Tab2 = Window:CreateTab("other", 4483362458) -- Title, Image
+-- Fly Speed Slider
+Tab:CreateSlider({
+   Name = "Fly Speed",
+   Range = {10, 300},
+   Increment = 10,
+   Suffix = " Speed",
+   CurrentValue = 50,
+   Flag = "FlySpeed",
+   Callback = function(Value)
+      flySpeed = Value
+   end,
+})
 
-local Paragraph = Tab:CreateParagraph({
+local Tab2 = Window:CreateTab("other", 4483362458)
+
+Tab:CreateParagraph({
    Title = "Recommended Settings For Fly",
    Content = "Use God Mode For Better Flying"
 })
 
 -- Reset HP Button
-local Button = Tab2:CreateButton({
+Tab2:CreateButton({
    Name = "Reset HP",
    Callback = function()
       local plr = game.Players.LocalPlayer
@@ -136,8 +152,8 @@ local Button = Tab2:CreateButton({
    end,
 })
 
--- Extra Toggle Example (customize name & logic)
-local Toggle = Tab2:CreateToggle({
+-- No Fall Damage Toggle
+Tab2:CreateToggle({
    Name = "No Fall Damage",
    CurrentValue = false,
    Flag = "ToggleNoFall",
@@ -158,7 +174,7 @@ local Toggle = Tab2:CreateToggle({
 })
 
 -- Max HP Slider
-local Slider = Tab2:CreateSlider({
+Tab2:CreateSlider({
    Name = "Max HP",
    Range = {100, 1000},
    Increment = 50,
@@ -176,4 +192,14 @@ local Slider = Tab2:CreateSlider({
       end
    end,
 })
+local Tab = Window:CreateTab("Other", 4483362458) -- Title, Image
 
+local Tab3 = Window:CreateTab("Other", 4483362458)
+
+Tab3:CreateButton({
+   Name = "Exit Hub",
+   Callback = function()
+      Rayfield:Destroy()
+      print("Bomboclat Hub Closed!")
+   end,
+})
