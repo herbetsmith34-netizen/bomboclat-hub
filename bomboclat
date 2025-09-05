@@ -1,0 +1,179 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Bomboclat Hub",
+   LoadingTitle = "Rayfield Interface Suite",
+   LoadingSubtitle = "by Lul h4x",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil,
+      FileName = "Bomboclat Hub"
+   },
+   Discord = {
+      Enabled = false,
+      Invite = "noinvitelink",
+      RememberJoins = true
+   },
+   KeySystem = true,
+   KeySettings = {
+      Title = "Bomboclat Key System",
+      Subtitle = "Key System",
+      Note = "The Key Is Bomboclat",
+      FileName = "Key",
+      SaveKey = false,
+      GrabKeyFromSite = false,
+      Key = {"Bomboclat"}
+   }
+})
+
+Rayfield:Notify({
+   Title = "Welcome",
+   Content = "Bomboclat Hub Loaded!",
+   Duration = 5,
+   Image = 4483362458,
+   Actions = {
+      Ignore = {
+         Name = "Okay!",
+         Callback = function()
+            print("User pressed Okay!")
+         end
+      },
+   },
+})
+
+local Tab = Window:CreateTab("main", 4483362458)
+
+-- Reset Walkspeed
+local Button = Tab:CreateButton({
+   Name = "Reset Speed",
+   Callback = function()
+      local char = game.Players.LocalPlayer.Character
+      if char and char:FindFirstChildOfClass("Humanoid") then
+         char:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
+         print("Walkspeed Reset!")
+      end
+   end,
+})
+
+-- Speed Slider
+local SpeedSlider = Tab:CreateSlider({
+   Name = "WalkSpeed",
+   Range = {1, 500},
+   Increment = 5,
+   Suffix = " WS",
+   CurrentValue = 16,
+   Flag = "WalkSpeed",
+   Callback = function(Value)
+      local char = game.Players.LocalPlayer.Character
+      if char and char:FindFirstChildOfClass("Humanoid") then
+         char:FindFirstChildOfClass("Humanoid").WalkSpeed = Value
+      end
+   end,
+})
+
+-- Fly System
+local flying = false
+local flySpeed = 50
+
+-- Fly Toggle
+local Toggle = Tab:CreateToggle({
+   Name = "Fly",
+   CurrentValue = false,
+   Flag = "FlyToggle",
+   Callback = function(Value)
+      flying = Value
+      local plr = game.Players.LocalPlayer
+      local char = plr.Character or plr.CharacterAdded:Wait()
+      local hum = char:FindFirstChildOfClass("Humanoid")
+      local hrp = char:FindFirstChild("HumanoidRootPart")
+
+      if flying then
+         print("Fly Enabled")
+         local bv = Instance.new("BodyVelocity")
+         bv.Name = "FlyVelocity"
+         bv.Velocity = Vector3.new(0,0,0)
+         bv.MaxForce = Vector3.new(4000,4000,4000)
+         bv.Parent = hrp
+
+         -- Move with WASD
+         game:GetService("RunService").RenderStepped:Connect(function()
+            if flying and hrp then
+               local dir = Vector3.new()
+               if game.UserInputService:IsKeyDown(Enum.KeyCode.W) then dir = dir + (workspace.CurrentCamera.CFrame.LookVector) end
+               if game.UserInputService:IsKeyDown(Enum.KeyCode.S) then dir = dir - (workspace.CurrentCamera.CFrame.LookVector) end
+               if game.UserInputService:IsKeyDown(Enum.KeyCode.A) then dir = dir - (workspace.CurrentCamera.CFrame.RightVector) end
+               if game.UserInputService:IsKeyDown(Enum.KeyCode.D) then dir = dir + (workspace.CurrentCamera.CFrame.RightVector) end
+               bv.Velocity = dir * flySpeed
+            end
+         end)
+      else
+         print("Fly Disabled")
+         if hrp:FindFirstChild("FlyVelocity") then
+            hrp.FlyVelocity:Destroy()
+         end
+      end
+   end,
+})
+
+local Tab2 = Window:CreateTab("other", 4483362458) -- Title, Image
+
+local Paragraph = Tab:CreateParagraph({
+   Title = "Recommended Settings For Fly",
+   Content = "Use God Mode For Better Flying"
+})
+
+-- Reset HP Button
+local Button = Tab2:CreateButton({
+   Name = "Reset HP",
+   Callback = function()
+      local plr = game.Players.LocalPlayer
+      local char = plr.Character or plr.CharacterAdded:Wait()
+      local hum = char:FindFirstChildOfClass("Humanoid")
+      if hum then
+         hum.Health = hum.MaxHealth
+         print("HP Reset!")
+      end
+   end,
+})
+
+-- Extra Toggle Example (customize name & logic)
+local Toggle = Tab2:CreateToggle({
+   Name = "No Fall Damage",
+   CurrentValue = false,
+   Flag = "ToggleNoFall",
+   Callback = function(Value)
+      local plr = game.Players.LocalPlayer
+      local char = plr.Character or plr.CharacterAdded:Wait()
+      local hum = char:FindFirstChildOfClass("Humanoid")
+      if not hum then return end
+
+      if Value then
+         print("No Fall Damage Enabled")
+         hum:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
+      else
+         print("No Fall Damage Disabled")
+         hum:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
+      end
+   end,
+})
+
+-- Max HP Slider
+local Slider = Tab2:CreateSlider({
+   Name = "Max HP",
+   Range = {100, 1000},
+   Increment = 50,
+   Suffix = " HP",
+   CurrentValue = 100,
+   Flag = "SliderMaxHP",
+   Callback = function(Value)
+      local plr = game.Players.LocalPlayer
+      local char = plr.Character or plr.CharacterAdded:Wait()
+      local hum = char:FindFirstChildOfClass("Humanoid")
+      if hum then
+         hum.MaxHealth = Value
+         hum.Health = Value -- also heal to full
+         print("Max HP set to:", Value)
+      end
+   end,
+})
+
